@@ -1,0 +1,175 @@
+{
+  "id" : "stg_payments",
+  "metainfo" : {
+    "label" : "stg_payments",
+    "autoLayout" : true,
+    "staleState" : "none",
+    "sourceSuggestions" : {
+      "sources" : [ ]
+    },
+    "graphConfig" : {
+      "userDefinedConfig" : {
+        "vars" : { }
+      }
+    }
+  },
+  "processes" : {
+    "source##Hp9wYGYT" : {
+      "id" : "source##Hp9wYGYT",
+      "component" : "Seed",
+      "metadata" : {
+        "label" : "source",
+        "phase" : 0,
+        "comment" : "-\n    Normally we would select from the table here, but we are using seeds to load\n    our data in this project\n    "
+      },
+      "properties" : {
+        "table" : {
+          "name" : "raw_payments",
+          "sourceType" : "Seed"
+        }
+      },
+      "ports" : {
+        "inputs" : [ ],
+        "outputs" : [ {
+          "id" : "DvOmjMnF",
+          "schema" : {
+            "providerType" : "Databricks",
+            "fields" : [ {
+              "name" : "id",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            }, {
+              "name" : "order_id",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            }, {
+              "name" : "payment_method",
+              "dataType" : {
+                "type" : "String"
+              }
+            }, {
+              "name" : "amount",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            } ]
+          },
+          "slug" : "out"
+        } ],
+        "isCustomOutputSchema" : false
+      }
+    },
+    "renamed##A6CCE1qd" : {
+      "id" : "renamed##A6CCE1qd",
+      "component" : "Reformat",
+      "metadata" : {
+        "label" : "renamed",
+        "phase" : 0,
+        "macroDependencies" : [ ]
+      },
+      "properties" : {
+        "columnsSelector" : [ "kcKxMRmH##id", "kcKxMRmH##order_id", "kcKxMRmH##payment_method" ],
+        "expressions" : [ {
+          "expression" : {
+            "expression" : "id"
+          },
+          "alias" : "payment_id"
+        }, {
+          "expression" : {
+            "expression" : "order_id"
+          }
+        }, {
+          "expression" : {
+            "expression" : "payment_method"
+          }
+        }, {
+          "expression" : {
+            "expression" : "-- `amount` is currently stored in cents, so we convert it to dollars\namount / 100"
+          },
+          "alias" : "amount"
+        } ]
+      },
+      "ports" : {
+        "inputs" : [ {
+          "id" : "kcKxMRmH",
+          "schema" : {
+            "providerType" : "Databricks",
+            "fields" : [ {
+              "name" : "id",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            }, {
+              "name" : "order_id",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            }, {
+              "name" : "payment_method",
+              "dataType" : {
+                "type" : "String"
+              }
+            }, {
+              "name" : "amount",
+              "dataType" : {
+                "type" : "Integer"
+              }
+            } ]
+          },
+          "slug" : "source"
+        } ],
+        "outputs" : [ {
+          "id" : "KphncEJX",
+          "slug" : "out"
+        } ],
+        "isCustomOutputSchema" : false
+      }
+    },
+    "stg_payments##l4seKBUx" : {
+      "id" : "stg_payments##l4seKBUx",
+      "component" : "TargetModel",
+      "metadata" : {
+        "label" : "stg_payments",
+        "phase" : 0,
+        "macroDependencies" : [ ]
+      },
+      "properties" : {
+        "customQueryDisabled" : true,
+        "customQuery" : false,
+        "incrementalEditorDisabled" : true,
+        "query" : "SELECT * \n\nFROM renamed\n",
+        "incrementalKey" : false,
+        "incremental" : {
+          "expression" : "true"
+        }
+      },
+      "ports" : {
+        "inputs" : [ {
+          "id" : "gisoo0Ej",
+          "slug" : "renamed"
+        } ],
+        "outputs" : [ {
+          "id" : "eysLhlTH",
+          "slug" : "out"
+        } ],
+        "isCustomOutputSchema" : false
+      }
+    }
+  },
+  "connections" : [ {
+    "id" : "dtDqXiKp",
+    "source" : "source##Hp9wYGYT",
+    "sourcePort" : "DvOmjMnF",
+    "target" : "renamed##A6CCE1qd",
+    "targetPort" : "kcKxMRmH"
+  }, {
+    "id" : "EVPLLNND",
+    "source" : "renamed##A6CCE1qd",
+    "sourcePort" : "KphncEJX",
+    "target" : "stg_payments##l4seKBUx",
+    "targetPort" : "gisoo0Ej"
+  } ],
+  "component" : "Model"
+}
